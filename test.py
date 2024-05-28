@@ -1,27 +1,25 @@
-"""
-______   ___  __   __ _____  _____  _____   _               _        
-| ___ \ / _ \ \ \ / /|_   _||  _  |/  ___| | |             | |       
-| |_/ // /_\ \ \ V /   | |  | | | |\ `--.  | |_   ___  ___ | |_  ___ 
-|  __/ |  _  | /   \   | |  | | | | `--. \ | __| / _ \/ __|| __|/ __|
-| |    | | | |/ /^\ \ _| |_ \ \_/ //\__/ / | |_ |  __/\__ \| |_ \__ \
-\_|    \_| |_/\/   \/ \___/  \___/ \____/   \__| \___||___/ \__||___/
-=======================================================================
-Tests for the paxios package.
+# ______   ___  __   __ _____  _____  _____   _               _ 
+# | ___ \ / _ \ \ \ / /|_   _||  _  |/  ___| | |             | |
+# | |_/ // /_\ \ \ V /   | |  | | | |\ `--.  | |_   ___  ___ | |_  ___
+# |  __/ |  _  | /   \   | |  | | | | `--. \ | __| / _ \/ __|| __|/ __|
+# | |    | | | |/ /^\ \ _| |_ \ \_/ //\__/ / | |_ |  __/\__ \| |_ \__ \
+# \_|    \_| |_/\/   \/ \___/  \___/ \____/   \__| \___||___/ \__||___/
+# =======================================================================
+# Tests for the paxios package.
 
-_author_: INovomiast2 (Ivan Novomiast)
-_version_: 1.0.0
-_license_: MIT
-_github_: https://github.com/INovomiast2/paxios
-"""
+# _author_: INovomiast2 (Ivan Novomiast)
+# _version_: 1.0.0
+# _license_: MIT
+# _github_: https://github.com/INovomiast2/paxios
 
 # Importing the necessary modules
-from paxios import fromFile, CreatePaxios
+from paxios import fromFile, CreatePaxios, json
 # Creating an instance of the CreatePaxios class
 
 def get_token():
 	return '1234567890'
 
-api = CreatePaxios(version=2, port=5500)
+api = CreatePaxios(version=1, port=5500)
 
 
 # This are some example routes.
@@ -41,6 +39,6 @@ def post_something():
 
 routes = api.list_routes()
 
-print(routes)
+print("Avaliable routes: {}".format(json.dumps(routes, indent=4)))
 
 api.run()

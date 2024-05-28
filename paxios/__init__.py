@@ -1,20 +1,18 @@
-"""
-  , __    ___,    _          _    __        
- /|/  \  /   |   (_\  /     | |  /\_\/   () 
-  |___/ |    |      \/      | | |    |   /\ 
-  |     |    |      /\    _ |/  |    |  /  \
-  |      \__/\_/  _/  \_/ \_/\/  \__/  /(__/
-  ==========================================
-  A supercharged version of the requests module, with more features and better performance.
+#   , __    ___,    _          _    __        
+#  /|/  \  /   |   (_\  /     | |  /\_\/   () 
+#   |___/ |    |      \/      | | |    |   /\ 
+#   |     |    |      /\    _ |/  |    |  /  \
+#   |      \__/\_/  _/  \_/ \_/\/  \__/  /(__/
+#   ==========================================
+#   A supercharged version of the requests module, with more features and better performance.
   
-  _sumary_:
-	Paxios permits you tu create in a super fast and easy ways a full API for your web application.
+#   _sumary_:
+# 	Paxios permits you tu create in a super fast and easy ways a full API for your web application.
 	
-  _author_: INovomiast2 (Ivan Novomiast)
-  _version_: 1.0.0
-  _license_: MIT
-  _github_: https://github.com/INovomiast2/paxios
-"""
+#   _author_: INovomiast2 (Ivan Novomiast)
+#   _version_: 1.0.0
+#   _license_: MIT
+#   _github_: https://github.com/INovomiast2/paxios
 
 # Here is all the code of paxios, this is going to be a long file, so be prepared.
 
@@ -100,12 +98,13 @@ class CreatePaxios():
 
 	def route(self, path: str, methods: List[str]):
 		def decorator(f):
-			if path not in self.routes:
-				self.routes[path] = {}
+			versioned_path = f"/v{self.version}{path}"
+			if versioned_path not in self.routes:
+				self.routes[versioned_path] = {}
 			for method in methods:
-				if method in self.routes[path]:
-					raise ValueError(f"La ruta {path} ya está definida para el método {method}.")
-				self.routes[path][method] = f
+				if method in self.routes[versioned_path]:
+					raise ValueError(f"La ruta {versioned_path} ya está definida para el método {method}.")
+				self.routes[versioned_path][method] = f
 			return f
 		return decorator
 
@@ -118,7 +117,7 @@ class CreatePaxios():
 			server.socket = ssl.wrap_socket(server.socket, keyfile=self.ssl_key, certfile=self.ssl_cert, server_side=True)
 			server.serve_forever()
 		else:
-			print("API running on http://{}:{}/v{}".format(self.host, self.port, self.version))
+			print("API running on http://{}:{}/v{}/".format(self.host, self.port, self.version))
 			server = self.CustomHTTPServer((self.host, self.port), self.RequestHandler, self.routes)
 			server.serve_forever()
    
