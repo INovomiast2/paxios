@@ -1,0 +1,46 @@
+"""
+______   ___  __   __ _____  _____  _____   _               _        
+| ___ \ / _ \ \ \ / /|_   _||  _  |/  ___| | |             | |       
+| |_/ // /_\ \ \ V /   | |  | | | |\ `--.  | |_   ___  ___ | |_  ___ 
+|  __/ |  _  | /   \   | |  | | | | `--. \ | __| / _ \/ __|| __|/ __|
+| |    | | | |/ /^\ \ _| |_ \ \_/ //\__/ / | |_ |  __/\__ \| |_ \__ \
+\_|    \_| |_/\/   \/ \___/  \___/ \____/   \__| \___||___/ \__||___/
+=======================================================================
+Tests for the paxios package.
+
+_author_: INovomiast2 (Ivan Novomiast)
+_version_: 1.0.0
+_license_: MIT
+_github_: https://github.com/INovomiast2/paxios
+"""
+
+# Importing the necessary modules
+from paxios import fromFile, CreatePaxios
+# Creating an instance of the CreatePaxios class
+
+def get_token():
+	return '1234567890'
+
+api = CreatePaxios(version=2, port=5500)
+
+
+# This are some example routes.
+@api.route('/users', methods=['GET'])
+def get_users():
+	return api.json({'users': ['user1', 'user2', 'user3']})
+
+# This is for testing taking the data from a file
+@api.route('/data', methods=['GET'])
+def get_data():
+    data = fromFile('test.json').read()
+    return api.json(data)
+
+@api.route('/postSomething', methods=['POST'])
+def post_something():
+    return api.json({'message': 'Data posted successfully!'})
+
+routes = api.list_routes()
+
+print(routes)
+
+api.run()
