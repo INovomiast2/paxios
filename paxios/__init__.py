@@ -24,8 +24,9 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 from urllib.parse import urlparse, parse_qs
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Type
 import ssl
+from .middlewares import Middleware
 
 # Defining the main class
 class CreatePaxios():
@@ -55,6 +56,7 @@ class CreatePaxios():
 		self.auth = auth
 		self.auth_token = auth_token
 		self.routes = {}
+		self.middlewares = []
   
 		@self.route('/', methods=['GET'])
 		def index():
@@ -63,6 +65,10 @@ class CreatePaxios():
 		@self.route('/version', methods=['GET'])
 		def api_version():
 			return self.json({'version': self.version})
+
+		@self.route('/servinfo', methods=['GET'])
+		def server_info():
+			return self.json({'host': self.host, 'port': self.port, 'ssl': self.ssl == True and 'enabled' or 'disabled', 'auth': self.auth == True and 'enabled' or 'disabled', 'paxios_version': '1.0.0', 'debug': self.debug == True and 'enabled' or 'disabled'})
 
 	class CustomHTTPServer(HTTPServer):
 		def __init__(self, server_address, RequestHandlerClass, routes, bind_and_activate=True):
@@ -79,9 +85,10 @@ class CreatePaxios():
 				self.end_headers()
 				self.wfile.write(response.encode())
 			else:
+				response = json.dumps({'message': 'Route not found'})
 				self.send_response(404)
 				self.end_headers()
-				self.wfile.write(b'Route not found')
+				self.wfile.write(response.encode())
 
 		def do_POST(self):
 			route = self.server.routes.get(self.path)
@@ -92,9 +99,38 @@ class CreatePaxios():
 				self.end_headers()
 				self.wfile.write(response.encode())
 			else:
+				response = json.dumps({'message': 'Route not found'})
 				self.send_response(404)
 				self.end_headers()
-				self.wfile.write(b'Route not found')
+				self.wfile.write(response.encode())
+
+		def do_PUT(self):
+			route = self.server.routes.get(self.path)
+			if route is not None and 'PUT' in route:
+				response = route['PUT']()
+				self.send_response(200)
+				self.send_header('Content-type', 'application/json')
+				self.end_headers()
+				self.wfile.write(response.encode())
+			else:
+				response = json.dumps({'message': 'Route not found'})
+				self.send_response(404)
+				self.end_headers()
+				self.wfile.write(response.encode())
+	
+		def handle_dynamic_routes(self, path):
+			route = self.server.routes.get(path)
+			if route is not None and 'GET' in route:
+				response = route['GET']()
+				self.send_response(200)
+				self.send_header('Content-type', 'application/json')
+				self.end_headers()
+				self.wfile.write(response.encode())
+			else:
+				response = json.dumps({'message': 'Route not found'})
+				self.send_response(404)
+				self.end_headers()
+				self.wfile.write(response.encode())
 
 	def route(self, path: str, methods: List[str]):
 		def decorator(f):
@@ -133,6 +169,13 @@ class CreatePaxios():
 	def list_routes(self):
 		route_names = {path: {method: func.__name__ for method, func in funcs.items()} for path, funcs in self.routes.items()}
 		return route_names
+
+	def use(self, middleware: Type[Middleware]) -> Middleware:
+		if not issubclass(middleware, Middleware):
+			raise ValueError("{} is not a valid middleware.".format(middleware))
+		instance = middleware()  # Crea una instancia de la subclase de Middleware
+		self.middlewares.append(instance)
+		return instance  # Devuelve la instancia
 
 class fromFile:
 	def __init__(self, file:str=None) -> None:
